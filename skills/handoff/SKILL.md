@@ -8,7 +8,7 @@ description: Save the session's working state to the project's docs so a fresh s
 Goal: nothing learned in this session is lost when the context is compacted or closed. A new session that reads
 only CLAUDE.md + `docs/STATE.md` must be able to continue from the right place, without being misled by stale lines.
 
-Paths like `docs/...` are relative to the **project root** (the current working directory), never to this skill's directory.
+Paths like `docs/...` are relative to the **project root**: the directory Claude Code was started in. Not this skill's directory, and not the shell's current directory after a `cd`.
 
 Write in the language the existing docs use (for new files: the language the user speaks).
 If `docs/STATE.md` does not exist, offer the `context-setup` skill instead and stop.
@@ -22,6 +22,9 @@ If `docs/STATE.md` does not exist, offer the `context-setup` skill instead and s
    Edit it in place:
    - Update or add only the bullets of the work this session touched. Keep other work items untouched.
      Remove an item only when it is finished (and its plan box says so) or the user dropped it.
+   - Nothing is lost: before removing any line (a finished item, an obsolete note, a "tried and dropped" entry),
+     append it as a dated line to `docs/logs/<work>.md`.
+   - Keep the `context-kit` marker comment at the top; the session-start hook injects only files that have it.
    - "Next" is one concrete action someone could start immediately ("run the X tests after fixing Y", not "continue").
    - Refresh "Waiting on the user", "Watch out", "Unverified assumptions", "Tried and dropped" for your items;
      delete lines that are no longer true. Anything recorded in LESSONS or DECISIONS (steps 5-6) is not repeated
@@ -31,11 +34,13 @@ If `docs/STATE.md` does not exist, offer the `context-setup` skill instead and s
    Mark instructions that are no longer valid as `(obsolete)` or remove them. Never leave an old "next step" standing.
 4. **Details** (numbers, file paths, commands, what was tried) go to `docs/logs/<work>.md` as dated lines. Not into
    the plan, not into STATE.
-5. **Decisions** made this session: add rows to `docs/DECISIONS.md` (create it from the template if missing).
-   A changed decision gets a new row; the old row is marked `→ superseded YYYY-MM-DD`.
+5. **Decisions** the user made or agreed to in this session: add rows to `docs/DECISIONS.md` (create it from the
+   template if missing). A changed decision gets a new row and the old row is marked `→ superseded YYYY-MM-DD`,
+   but only if the user agreed to the change; otherwise list it under "Waiting on the user".
 6. **Lessons**: new recurring pitfalls → one line each in `docs/LESSONS.md` (create from template if missing).
    Grep first; do not duplicate.
-7. **Other tracking docs** listed in the CLAUDE.md map (roadmap, TODO): keep their "active" entry consistent with STATE.
+7. **Other tracking docs** listed in the CLAUDE.md map (roadmap, TODO): if one contradicts STATE, propose the fix
+   in your report; do not edit them without the user's approval.
 8. **Check**: STATE <= 40 lines, plan box <= 12 lines, LESSONS <= 60 lines. Over budget → move the excess to
    `docs/logs/` (suggest `doc-hygiene` if it is large). Re-read STATE once: does every line describe the present?
    Does anything contradict a plan box?

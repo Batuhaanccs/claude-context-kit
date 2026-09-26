@@ -5,7 +5,7 @@ description: Keep the project's context docs small, consistent and current. Use 
 
 # Doc hygiene
 
-Paths like `docs/...` are relative to the **project root** (the current working directory), never to this skill's directory.
+Paths like `docs/...` are relative to the **project root**: the directory Claude Code was started in. Not this skill's directory, and not the shell's current directory after a `cd`.
 
 ## Budgets
 | File | Limit | When exceeded |

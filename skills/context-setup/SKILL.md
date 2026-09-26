@@ -5,7 +5,7 @@ description: Set up the cross-session context system (context-kit) in a project,
 
 # Context setup
 
-Paths like `docs/...` are relative to the **project root** (the current working directory), never to this skill's directory.
+Paths like `docs/...` are relative to the **project root**: the directory Claude Code was started in. Not this skill's directory, and not the shell's current directory after a `cd`.
 
 Templates live in `${CLAUDE_SKILL_DIR}/templates/`: STATE, PLAN, LESSONS, DECISIONS, CLAUDE-block.
 Doc content is written in the user's language; template headings may be translated to match.
@@ -16,6 +16,9 @@ Doc content is written in the user's language; template headings may be translat
 - Measure sizes (`wc -l`). Note what is missing, oversized, duplicated or stale
   (e.g. a "next step" that is already done).
 - If `docs/STATE.md` or a `context-kit:start` block already exists, this is a re-run: only report gaps.
+  An existing `docs/STATE.md` without the `context-kit` marker belongs to something else: do not touch it; ask the user.
+- Is `docs/` a published docs site (mkdocs.yml, docusaurus.config.*, Sphinx conf.py, `_config.yml`, GitHub Pages)?
+  Then warn: internal notes could be published. Suggest excluding them in the site config; let the user decide.
 
 ## 2. Propose, then wait for approval
 Show a short table: what exists, what you will create, what you suggest moving. Ask two questions:
@@ -24,7 +27,8 @@ Show a short table: what exists, what you will create, what you suggest moving. 
 - Anything that must not be touched?
 
 ## 3. Create (only what is missing; start small)
-- `docs/STATE.md` from the template, filled with the **real current state** (from this conversation, git log,
+- `docs/STATE.md` from the template (keep its `context-kit` marker comment: the hook injects only files that
+  have it), filled with the **real current state** (from this conversation, git log,
   plan files). If there is no active work, say so in one line. Use `date "+%Y-%m-%d %H:%M"` for the time.
 - CLAUDE.md: append the CLAUDE-block template (between its `context-kit:start/end` markers). Do not delete or
   rewrite existing rules. Add map rows for the project's own important docs; remove rows for files that do not exist.

@@ -4,7 +4,9 @@ Cross-session memory for Claude Code projects. When the context fills up, the se
 session for a different purpose, Claude should not **forget** what was done, **misread** it, or **act on stale
 information**, and it should do this without bloating the context or turning docs into rigid recipes.
 
-It is inactive in any project without `docs/STATE.md`. Installing it changes nothing until you run setup in a project.
+It is inactive in any project without a context-kit `docs/STATE.md` (the file must carry the `context-kit` marker
+comment that setup writes, so an unrelated `docs/STATE.md` in some repo is never injected). Installing it changes
+nothing until you run setup in a project.
 
 ## How it works
 
@@ -32,15 +34,17 @@ Principles:
 
 ### The session-start hook
 `scripts/session-start.sh` runs on `startup | resume | clear | compact` and injects STATE.md with:
-- **Staleness check:** commits made after STATE.md was last updated (count + newest subjects), uncommitted code
-  changes, or file age when there is no git. The biggest risk for any doc-based memory is a doc nobody updated.
+- **Staleness check:** project commits made after STATE.md was last updated (count + newest subjects), uncommitted or
+  untracked changes, or file age when there is no git. Only the project directory counts, and `docs/` is excluded, so
+  docs-only commits and other packages in a monorepo do not raise false alarms. The biggest risk for any doc-based memory is a doc nobody updated.
   This makes it visible instead of silent.
 - **Guidance by source:**
   - `startup` / `clear`: STATE is a hypothesis. Confirm briefly only if the request concerns it; otherwise just help.
   - `compact`: the conversation summary is newer than STATE. Trust the summary and keep working without stopping.
   - `resume`: the conversation history is newer than STATE.
 - **Budgets:** hints above 40 lines; hard cap at 150 lines with an explicit "truncated" note (never silent).
-- **Safety:** exits silently without STATE.md; git calls have a 5 s timeout; always exits 0.
+- **Safety:** silent without a marked STATE.md; ignores symlinked STATE; git checks have a 3 s per-call timeout and a
+  6 s total budget, and never take the index lock; always exits 0.
 
 ### Skills
 | Skill | Say | Does |
@@ -88,6 +92,8 @@ Per-project removal: delete the `context-kit:start … end` block from CLAUDE.md
 ## Limits (honest notes)
 - No plugin guarantees memory. The handoff habit is still yours; the hook makes a missed handoff **visible**.
 - Handoff quality depends on what is still in context; after heavy compaction, details may already be lost.
+- If `docs/` is a published docs site (MkDocs, Docusaurus, GitHub Pages), exclude the context files in the site
+  config; setup warns about this.
 - Project knowledge belongs in `docs/` (visible, versioned, fixable). Claude's auto memory is for personal preferences.
 
 ## Background
