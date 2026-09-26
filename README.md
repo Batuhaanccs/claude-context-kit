@@ -1,108 +1,98 @@
-# Claude Context Kit: oturumlar arası bağlam sistemi
+# context-kit
 
-Amaç: Context dolduğunda, oturum kapandığında ya da başka bir amaçla yeni oturum açıldığında Claude'un
-yapılanları **unutmaması**, **yanlış anlamaması** ve **eskimiş bilgiyle iş yapmaması**. Bunu yaparken context'i
-şişirmemek ve Claude'un esnekliğini öldürmemek.
+Cross-session memory for Claude Code projects. When the context fills up, the session ends, or you open a new
+session for a different purpose, Claude should not **forget** what was done, **misread** it, or **act on stale
+information**, and it should do this without bloating the context or turning docs into rigid recipes.
 
-Proje bağımsızdır, her projeye kurulabilir. Bu klasör bir öneri ve deneme alanıdır. Hiçbir projeye henüz uygulanmadı.
+It is inactive in any project without `docs/STATE.md`. Installing it changes nothing until you run setup in a project.
 
----
-
-## 1. Sorun neden oluyor?
-
-| Sorun | Sebep |
-|---|---|
-| Unutma | Bilgi sadece konuşmada duruyor. Context sıkışınca ya da oturum kapanınca gidiyor. |
-| Yanlış anlama | Dosyada eskimiş bilgi var ve güncel bilgiyle karışıyor (örn. artık geçersiz bir "sıradaki adım" talimatı hâlâ duruyor). |
-| Context şişmesi | Her şey tek dosyada, her oturumda baştan sona okunuyor. |
-| Esneklik kaybı | Dokümanlar "ne yapılacak"ı adım adım dikte ediyor, "neden"i söylemiyor. Durum değişince Claude eski tarife uyuyor. |
-
-Model uzun context'te dikkatini dağıtır ("context rot"). Anthropic'in önerisi: notları context **dışında** tutup
-**sadece gerektiği an** geri çağırmak (structured note-taking + just-in-time retrieval). Kaynaklar sonda.
-
----
-
-## 2. Çözüm: 3 katman + devir teslim notu
-
-Senin "genel md + çok detaylı md, gerekirse baksın" fikrin doğru yön. Eksik olan iki şey var: **katmanlar arası yönlendirme**
-(nerede ne var haritası) ve **tek bir güncel durum dosyası** (devir teslim).
+## How it works
 
 ```
-Katman 0: HER OTURUM otomatik yüklenir      (bütçe: toplam ~8 KB / ~3k token)
-  CLAUDE.md          kurallar + "harita" (hangi bilgi hangi dosyada)
-  docs/STATE.md      DEVİR TESLİM: şu an ne yapılıyor, sıradaki adım, açık sorular   (<= 40 satır)
+Layer 0: every session (~40 lines of STATE + a ~20-line block in CLAUDE.md)
+  CLAUDE.md            rules + map: which fact lives in which file
+  docs/STATE.md        handoff note: active work items, next step, open questions   (injected by hook)
 
-Katman 1: İhtiyaç olunca okunur              (dosya başına <= ~150 satır)
-  docs/PROJECT.md    projenin "neden"i, nadiren değişir
-  docs/DECISIONS.md  kararlar: tarih | karar | neden     (tek satır)
-  docs/LESSONS.md    teknik tuzaklar: "X yapınca Y oluyor, çözüm Z"   (tek satır)
-  docs/plans/<iş>.md iş planı: EN ÜSTTE 10 satırlık durum kutusu, sonra adımlar
+Layer 1: read on demand
+  docs/DECISIONS.md    date | decision | why | scope   (superseded rows are kept and marked)
+  docs/LESSONS.md      [area] symptom → cause → fix    (grep, never read whole)
+  docs/plans/<work>.md status box on top (<= 12 lines), then steps with "done when"
 
-Katman 2: Arşiv, nadiren okunur (grep ile aranır)
-  docs/logs/<iş>.md  adım adım ayrıntılı sonuç günlüğü (sayılar, dosya yolları, denenen/bırakılan)
-  git geçmişi        kodun ve asset'lerin tam geçmişi
-  reference/         ham kaynaklar (PDF, GDD, veri)
+Layer 2: archive, grep only
+  docs/logs/<work>.md  detailed results, numbers, what was tried
+  git history
 ```
 
-**Kural: Bir bilgi tek yerde yaşar.** Diğer yerler ona sadece bağlantı verir. Böylece iki dosya çelişmez.
+Principles:
+- **One fact lives in one place**; other places link to it, so two files cannot contradict each other.
+- **Decision + reason, not recipes.** When circumstances change, Claude can see why something was done and
+  adapt, instead of following an outdated step list.
+- **Docs are a hypothesis; reality wins.** Conflicts between docs and code/git are reported and fixed.
+- **Start small.** Setup creates only STATE and the CLAUDE.md block. Other files appear when there is content.
 
-### Neden bu, "her şeyi çok detaylı yaz"dan iyi?
-- Claude her oturumda sadece ~3k token okur, geri kalanı haritadan bulup **ihtiyaç olduğunda** açar. Context yavaş dolar.
-- Ayrıntı kaybolmaz, sadece Katman 2'ye taşınır.
-- "Şu an neredeyiz" sorusunun tek cevabı `STATE.md`'dir. Eski plan metni kafa karıştırmaz.
+### The session-start hook
+`scripts/session-start.sh` runs on `startup | resume | clear | compact` and injects STATE.md with:
+- **Staleness check:** commits made after STATE.md was last updated (count + newest subjects), uncommitted code
+  changes, or file age when there is no git. The biggest risk for any doc-based memory is a doc nobody updated.
+  This makes it visible instead of silent.
+- **Guidance by source:**
+  - `startup` / `clear`: STATE is a hypothesis. Confirm briefly only if the request concerns it; otherwise just help.
+  - `compact`: the conversation summary is newer than STATE. Trust the summary and keep working without stopping.
+  - `resume`: the conversation history is newer than STATE.
+- **Budgets:** hints above 40 lines; hard cap at 150 lines with an explicit "truncated" note (never silent).
+- **Safety:** exits silently without STATE.md; git calls have a 5 s timeout; always exits 0.
 
-### Esneklik nasıl korunur?
-- Dokümanlar **karar + neden + sınır** yazar, adım adım tarif yazmaz.
-  Kötü: "Önbellek süresini 5 dk yap." İyi: "API kota aşımı yaşandı, önbellek süresi 5 dk yapıldı (karar YYYY-MM-DD). Kota sorunu çözülürse düşürülebilir."
-- CLAUDE.md'de açık kural: "Doküman ile gerçek durum çelişirse gerçeğe bak (kod, sahne, git) ve çelişkiyi söyle. Körü körüne uyma."
-- Kararlar değiştirilebilir, ama kullanıcıya sorulup `DECISIONS.md`'ye yeni satır olarak yazılır. Eski satır silinmez, "yerine geçti" diye işaretlenir.
-
----
-
-## 3. İş akışı (ritüeller)
-
-| Ne zaman | Ne olur | Nasıl |
+### Skills
+| Skill | Say | Does |
 |---|---|---|
-| Oturum başı | Claude `STATE.md`'yi okur, **3 satırda anladığını söyler**, kullanıcı onaylar ya da düzeltir | SessionStart hook otomatik enjekte eder + `resume` skill |
-| İş sırasında | Adım bitince plan kutucuğu + log satırı. Yeni tuzak öğrenilince LESSONS'a 1 satır | Alışkanlık, CLAUDE.md kuralı |
-| Context ~%70 dolunca ya da oturum biterken | "devret" / `/handoff` → STATE, LESSONS, plan kutusu, ROADMAP güncellenir | `handoff` skill |
-| Compaction sonrası | STATE.md otomatik yeniden enjekte edilir, özet eksik kalsa bile yol kaybolmaz | SessionStart hook (source: compact) |
-| Farklı amaçla yeni oturum | Sadece Katman 0 yüklenir. İlgisiz planlar okunmaz | Harita sayesinde |
-| Ayda bir / dosya bütçeyi aşınca | Eskiyen satırlar log'a/arşive taşınır | `doc-hygiene` skill |
+| `context-setup` | "set up context-kit" / "bağlam sistemini kur" | Inspects the project, proposes a plan, waits for approval, creates STATE + CLAUDE.md block |
+| `handoff` | "handoff" / "devret" | Edits (never rewrites) STATE for the work it touched; updates the plan box, decisions, lessons and logs |
+| `resume-work` | "continue" / "devam" | Reads STATE and the plan's status box, checks git, confirms in <= 4 lines before working |
+| `doc-hygiene` | "doc hygiene" / "dokümanları temizle" | Budgets, staleness sweep, contradictions, map check. Moves content, never loses it |
 
-"Devret" en kritik adım. Context dolmadan **önce** yapılmalı, çünkü compaction sonrası Claude detayları zaten kaybetmiş olur.
+STATE.md is an **index of active work items**, one bullet each. Parallel work streams do not overwrite each other,
+and handoff re-reads the file from disk before editing, in case another session changed it.
 
----
+## Install
 
-## 4. Plugin yapısı (`context-kit`)
+Requires Claude Code with Git Bash on Windows (Claude Code's normal Windows setup) or any `bash` on macOS/Linux.
 
+```bash
+# Try without installing (this session only)
+claude --plugin-dir /path/to/claude-context-kit
+
+# Permanent install (this repo is its own marketplace)
+claude plugin marketplace add /path/to/claude-context-kit      # or: <github-user>/claude-context-kit
+claude plugin install context-kit@context-kit --scope user
 ```
-.claude-plugin/plugin.json      plugin tanımı (ad: context-kit)
-skills/                         Claude bu skill'leri tetikleyici kelimelerle kendisi çağırır
-  context-setup/SKILL.md        "bağlam sistemini kur": projeye STATE/LESSONS/DECISIONS + CLAUDE.md haritası
-  context-setup/templates/      CLAUDE, STATE, LESSONS, DECISIONS, PLAN şablonları
-  handoff/SKILL.md              "devret": oturum sonu güncellemesi
-  resume/SKILL.md               "devam / kaldığın yerden": oturum başı
-  doc-hygiene/SKILL.md          "dokümanları temizle": bütçe kontrolü ve arşivleme
-hooks/hooks.json                SessionStart: docs/STATE.md'yi otomatik ekler (startup, resume, clear, compact)
-scripts/inject-state.sh         hook betiği (STATE.md yoksa sessizce çıkar)
-README.md                       bu dosya
-```
+Local-directory installs load files in place: edits take effect in the next session or after `/reload-plugins`.
 
-## 5. Deneme ve kurulum (henüz yapılmadı)
-1. **Doğrula:** `claude plugin validate D:\claude-context-kit`
-2. **Kurmadan dene (sadece o oturum):** `claude --plugin-dir D:\claude-context-kit`
-   - Test: yeni oturumda STATE.md içeriği geliyor mu? "devret" deyince handoff çalışıyor mu?
-3. **Kalıcı kurulum:** yerel bir marketplace ile (`/plugin` komutları). Kesin adımlar kurulum sırasında belgeden doğrulanır.
-4. **Kapatma / kaldırma:** `/plugin` menüsünden devre dışı bırakılır. Dosyalara dokunmak gerekmez.
-5. **Mevcut bir projeyi geçirmek:** o projede "bağlam sistemini kur" de. `context-setup` önce inceler, plan sunar, onay ister.
+Disable / remove: `claude plugin disable context-kit@context-kit`, `claude plugin uninstall context-kit@context-kit`.
+Per-project removal: delete the `context-kit:start … end` block from CLAUDE.md and the `docs/` files you no longer want.
 
-## 6. Riskler ve dürüst notlar
-- **Güncellenmeyen doküman, dokümansızlıktan kötüdür.** Sistem ancak "devret" alışkanlığıyla çalışır. Skill ve hook bunu kolaylaştırır, garanti etmez.
-- Hook'lar Claude Code sürümüne bağlıdır. `SessionStart` ve `source: compact` davranışı kurulumdan sonra bir kez test edilmeli.
-- Otomatik "auto memory" (`~/.claude/projects/.../memory`) sadece kişisel tercihler için kalmalı. Proje bilgisi `docs/`'ta durmalı, çünkü görünür, düzeltilebilir ve git'e girebilir.
+## Everyday use
+1. In a project: "bağlam sistemini kur" / "set up context-kit" (once).
+2. At the start of a session: "devam" / "continue". Other requests work normally.
+3. Before closing, or when the context is long: "devret" / "handoff". Do it **before** compaction, when details
+   are still in context.
+4. When docs feel messy or the hook warns: "doc hygiene".
 
-## Kaynaklar
-- Anthropic, Effective context engineering for AI agents: https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
-- Claude Cookbook, context engineering (memory, compaction, tool clearing): https://platform.claude.com/cookbook/tool-use-context-engineering-context-engineering-tools
-- Cline Memory Bank (kısa/uzun süreli hafıza ayrımı): https://docs.cline.bot/best-practices/memory-bank
+## Development
+- `bash tests/test-session-start.sh`: hook tests (no git, stale/fresh git, dirty tree, every source, budgets,
+  Windows paths, UTF-8, garbage stdin).
+- `claude plugin validate .`
+- Manual check after hook changes (cannot be automated in `-p` mode): in a test project, run `/compact` in an
+  interactive session, then ask Claude to quote the context-kit guidance it received. It must be the "summary is
+  NEWER" line.
+
+## Limits (honest notes)
+- No plugin guarantees memory. The handoff habit is still yours; the hook makes a missed handoff **visible**.
+- Handoff quality depends on what is still in context; after heavy compaction, details may already be lost.
+- Project knowledge belongs in `docs/` (visible, versioned, fixable). Claude's auto memory is for personal preferences.
+
+## Background
+- Anthropic, [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents): structured note-taking outside the context, just-in-time retrieval.
+- Anthropic, [Effective harnesses for long-running agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents): a progress file plus git log as the session-start anchor.
+- [Cline Memory Bank](https://docs.cline.bot/best-practices/memory-bank): an active-context file separate from long-term knowledge, plus an explicit "update memory bank" ritual.
+
+License: MIT

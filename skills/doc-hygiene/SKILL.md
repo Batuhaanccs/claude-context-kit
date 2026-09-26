@@ -1,23 +1,31 @@
 ---
 name: doc-hygiene
-description: Proje dokümanlarını temizle ve bütçede tut. Kullanıcı "dokümanları temizle", "md'ler şişti", "doc hygiene" dediğinde ya da STATE/LESSONS/plan dosyaları bütçeyi aştığında kullan. Eskiyen bilgiyi arşive taşır, çelişkileri bulur, hiçbir bilgiyi silmez.
+description: Keep the project's context docs small, consistent and current. Use when the user says "clean up the docs", "dokümanları temizle", "md'ler şişti", "doc hygiene", or when STATE/LESSONS/plan files exceed their line budgets or the session-start note warns that STATE is stale. Moves stale content to logs; never loses information.
 ---
 
-# Doc hygiene: dokümanları bütçede tut
+# Doc hygiene
 
-## Bütçeler
-| Dosya | Sınır | Aşarsa |
+Paths like `docs/...` are relative to the **project root** (the current working directory), never to this skill's directory.
+
+## Budgets
+| File | Limit | When exceeded |
 |---|---|---|
-| CLAUDE.md | ~80 satır | Uzun açıklamaları ayrı dosyaya taşı, bağlantı bırak |
-| docs/STATE.md | 40 satır | Geçmişe ait satırlar → `docs/logs/<iş>.md` |
-| docs/LESSONS.md | 60 satır | Artık geçerli olmayanlar (araç güncellendi vb.) → `docs/logs/lessons-archive.md` |
-| Plan durum kutusu | 12 satır | Ayrıntı → log |
-| Plan dosyası | ~150 satır | "Sonuç" paragrafları → log, planda tek satır + bağlantı |
-| ROADMAP "Bitti" | 30 satır | Eskiler silinir (git geçmişinde var) |
+| context-kit block in CLAUDE.md | ~20 lines | Trim wording; details belong in the mapped files |
+| `docs/STATE.md` | 40 lines | Past-tense lines → `docs/logs/<work>.md` |
+| `docs/LESSONS.md` | 60 lines | Lessons no longer valid (tool upgraded, code removed) → `docs/logs/lessons-archive.md` |
+| Plan status box | 12 lines | Detail → the work's log |
+| Plan file | ~150 lines | "Result" paragraphs → log; leave one line + link |
+| Finished plans | n/a | Move to `docs/plans/done/`; remove from STATE |
 
-## Adımlar
-1. `wc -l` ile boyutları ölç, bütçeyi aşanları listele.
-2. Çelişki ara: aynı bilgi iki yerde farklı mı? (örn. plan "Adım 5 sıradaki" diyor, STATE "Adım 9"). Tek kaynağa indir.
-3. Eskimiş talimatları bul (örn. tamamlanmış bir işin hâlâ "sıradaki" diye duran talimatı). "(eski)" işaretle ya da log'a taşı.
-4. Taşı, silme. Taşınan her bölümün yerine tek satır bağlantı bırak.
-5. Kullanıcıya önce/sonra satır sayısını ve taşınanların listesini göster. Onay almadan büyük taşıma yapma.
+## Steps
+1. Measure with `wc -l`; list what is over budget.
+2. **Staleness sweep:** for each STATE line and each plan "Next", check reality (git log, the files named).
+   Anything already done, abandoned or wrong is updated or moved to the log.
+3. **Contradictions:** the same fact stated differently in two places (e.g. plan says "Step 5 next", STATE says
+   "Step 9"). Reduce to one source; the other place links to it.
+4. **Map check:** every path in the CLAUDE.md map exists; every important doc is on the map.
+5. **Move, don't delete.** Leave a one-line link where content was moved. Delete only content that is fully
+   preserved in git history, and only with the user's approval.
+6. Show the user before/after line counts and the list of moves. Ask before any large move or split.
+
+Write in the language the docs already use.

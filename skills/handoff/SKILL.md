@@ -1,31 +1,50 @@
 ---
 name: handoff
-description: Oturumu devret. Kullanıcı "devret", "handoff", "oturumu kapat", "context doluyor", "kaydet ve bitir" dediğinde ya da context belirgin şekilde dolduğunda kullan. Projenin docs/STATE.md, LESSONS.md, plan durum kutusu ve roadmap dosyalarını bir sonraki oturum sıfırdan devam edebilecek şekilde günceller.
+description: Save the session's working state to the project's docs so a fresh session can continue without loss. Use when the user says "handoff", "devret", "save state", "wrap up", "oturumu kapat", "kaydet ve bitir", "context is filling up", or before ending a long session in a project that has docs/STATE.md. Updates only docs, never code.
 ---
 
-# Handoff: oturumu devret
+# Handoff
 
-Amaç: bu oturumdaki bilgi, context kapansa bile kaybolmasın. Bir sonraki Claude sadece Katman 0'ı (CLAUDE.md + STATE.md)
-okuyup doğru yerden devam edebilmeli.
+Goal: nothing learned in this session is lost when the context is compacted or closed. A new session that reads
+only CLAUDE.md + `docs/STATE.md` must be able to continue from the right place, without being misled by stale lines.
 
-## Adımlar
-1. **Durumu topla (dosya okuma değil, bu konuşmadan):** aktif iş, son biten adım, yarım kalan iş, çalışma alanı durumu
-   (git status varsa bak), kullanıcıdan bekleyen kararlar, bu oturumda öğrenilen teknik tuzaklar.
-2. **docs/STATE.md'yi yeniden yaz** (şablon: `context-setup` skill'indeki `templates/STATE.template.md`). Dosya yoksa önce `context-setup` öner. Kurallar:
-   - <= 40 satır. Geçmiş değil, şimdi.
-   - "Sıradaki adım" tek ve somut olsun ("Adım 11: ağaç kaynağı kararı kullanıcıda" gibi).
-   - Tarih ve saat yaz.
-3. **docs/LESSONS.md'ye** bu oturumda öğrenilen, tekrar edebilecek tuzakları ekle (tek satır: belirti → sebep → çözüm).
-   Zaten yazılı olanı tekrar yazma.
-4. **Plan dosyasının üstündeki durum kutusunu** güncelle. Adım kutucukları doğru mu kontrol et.
-   Eskimiş metin varsa (artık geçerli olmayan talimat) sil ya da "(eski)" diye işaretle.
-5. **Ayrıntılı sonuçları** (sayılar, dosya yolları, denenenler) `docs/logs/<iş>.md`'ye ekle. Plana değil.
-6. **Proje roadmap'i varsa** "aktif" satırını STATE ile tutarlı yap.
-7. **Bütçe kontrolü:** STATE > 40 satır, LESSONS > 60 satır ya da plan kutusu > 12 satır ise fazlasını log'a/arşive taşı.
-8. Kullanıcıya **5 satırı geçmeyen** bir özet ver: neyi güncellediğini ve yeni oturumda ne yazması gerektiğini
-   (genelde sadece "devam" ya da "kaldığın yerden").
+Paths like `docs/...` are relative to the **project root** (the current working directory), never to this skill's directory.
 
-## Yapma
-- Kod, sahne, asset değiştirme. Bu skill sadece doküman günceller.
-- Commit atma (kullanıcı ayrıca isterse at).
-- Konuşmayı olduğu gibi kopyalama. Karar ve durum yaz, sohbet değil.
+Write in the language the existing docs use (for new files: the language the user speaks).
+If `docs/STATE.md` does not exist, offer the `context-setup` skill instead and stop.
+
+## Steps
+1. **Collect from this conversation** (not from files): which work items this session touched, the last finished
+   step, anything half-done, decisions made (with reasons), pending questions for the user, approaches tried and
+   dropped, beliefs not yet verified, recurring pitfalls discovered. Run `git status --short` if it is a git repo.
+   Get the real time with `date "+%Y-%m-%d %H:%M"`; never guess it.
+2. **Re-read `docs/STATE.md` from disk now** (another session may have changed it since it was injected).
+   Edit it in place:
+   - Update or add only the bullets of the work this session touched. Keep other work items untouched.
+     Remove an item only when it is finished (and its plan box says so) or the user dropped it.
+   - "Next" is one concrete action someone could start immediately ("run the X tests after fixing Y", not "continue").
+   - Refresh "Waiting on the user", "Watch out", "Unverified assumptions", "Tried and dropped" for your items;
+     delete lines that are no longer true. Anything recorded in LESSONS or DECISIONS (steps 5-6) is not repeated
+     in STATE; a fixed pitfall is a lesson, not a "watch out".
+   - Update the `Updated:` line.
+3. **Plan status box** (`docs/plans/<work>.md`, if the work has one): tick finished steps, update Status/Next/Blocked.
+   Mark instructions that are no longer valid as `(obsolete)` or remove them. Never leave an old "next step" standing.
+4. **Details** (numbers, file paths, commands, what was tried) go to `docs/logs/<work>.md` as dated lines. Not into
+   the plan, not into STATE.
+5. **Decisions** made this session: add rows to `docs/DECISIONS.md` (create it from the template if missing).
+   A changed decision gets a new row; the old row is marked `→ superseded YYYY-MM-DD`.
+6. **Lessons**: new recurring pitfalls → one line each in `docs/LESSONS.md` (create from template if missing).
+   Grep first; do not duplicate.
+7. **Other tracking docs** listed in the CLAUDE.md map (roadmap, TODO): keep their "active" entry consistent with STATE.
+8. **Check**: STATE <= 40 lines, plan box <= 12 lines, LESSONS <= 60 lines. Over budget → move the excess to
+   `docs/logs/` (suggest `doc-hygiene` if it is large). Re-read STATE once: does every line describe the present?
+   Does anything contradict a plan box?
+9. **Report in at most 5 lines**: which files changed, and what to type in the next session (usually just
+   "devam" / "continue"). If the repo is git, offer to commit the docs; do not commit unasked.
+
+Templates: `${CLAUDE_SKILL_DIR}/../context-setup/templates/`.
+
+## Do not
+- Change code, assets or configs. This skill only edits docs.
+- Paste conversation transcript. Write state and decisions, not dialogue.
+- Rewrite STATE.md from scratch; other work items may live there.

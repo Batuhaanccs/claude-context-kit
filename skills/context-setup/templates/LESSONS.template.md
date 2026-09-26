@@ -1,9 +1,6 @@
-# Teknik tuzaklar ve çözümleri
-<!-- KATMAN 1. Tek satır: [alan] belirti → sebep → çözüm (tarih). <= 60 satır. Grep ile aranır.
-     Sadece tekrar edebilecek, kaybedilince vakit yediren bilgiler. Tek seferlik hatalar yazılmaz. -->
+# Lessons (pitfalls and fixes)
+<!-- context-kit · Layer 1: never read whole; grep by [area] before working with a tool/API. <= 60 lines.
+     One line each: [area] symptom → cause → fix (date).
+     Only things that can recur and cost time when forgotten. No one-off mistakes. -->
 
-## <Alan, örn. bir araç, kütüphane ya da API>
-- [alan] <ne olunca> → <neden> → <ne yap> (YYYY-MM-DD)
-
-## <Alan, örn. URP>
-- ...
+- [<area>] <what happens> → <why> → <what to do> (YYYY-MM-DD)

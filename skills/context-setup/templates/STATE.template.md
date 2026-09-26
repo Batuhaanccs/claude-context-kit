@@ -1,22 +1,22 @@
-# Durum (devir teslim)
-<!-- KATMAN 0. Her oturum başında okunur. <= 40 satır. Geçmiş değil, ŞİMDİ. Eskiyen satır log'a taşınır. -->
-Son güncelleme: YYYY-MM-DD HH:MM, <kim / hangi oturum>
+# State (handoff note)
+<!-- context-kit · Layer 0: injected at every session start. Keep <= 40 lines.
+     The present, not history: remove lines once they are no longer true.
+     One bullet per active work item; details live in that item's plan status box.
+     Handoff edits only the lines of the work it touched; it never rewrites other items. -->
+Updated: YYYY-MM-DD HH:MM
 
-## Şu an
-- Aktif iş: <iş adı> → plan: `docs/plans/<iş>.md`
-- Nerede kaldık: <1-2 cümle, somut: hangi adım, hangi dosya, hangi durum>
-- Çalışma alanı durumu: <temiz / commit'lenmemiş değişiklik var: ...>
+## Active work
+- **<work name>**: <where it stands, 1 sentence, concrete>. Next: <one concrete action>. Plan: `docs/plans/<work>.md` (or "no plan")
 
-## Sıradaki adım
-1. <tek somut sonraki eylem>
-2. <ondan sonra>
+## Waiting on the user
+- <question> (options: A / B; recommendation: A)
 
-## Kullanıcı kararı bekleyenler
-- <soru> (seçenekler: A / B, önerim: A)
+## Watch out (temporary, this work cycle only)
+- <e.g. "the user hand-edited X; do not overwrite it">
+<!-- Recurring technical pitfalls go to LESSONS.md, not here. -->
 
-## Dikkat (bu işe özel, geçici)
-- <örn. "kullanıcı X dosyasını elle düzenledi, üzerine yazma">
-- <kalıcı teknik tuzaksa buraya değil LESSONS.md'ye>
+## Unverified assumptions
+- <something believed but not yet checked; say how to check it>
 
-## Onay bekleyen sonuçlar
-- <adım, commit, görüntü yolu>
+## Tried and dropped
+- <approach> → dropped because <reason> (so it is not retried blindly)

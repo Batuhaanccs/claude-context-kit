@@ -1,0 +1,14 @@
+{
+  "name": "context-kit",
+  "description": "Marketplace for the context-kit plugin (cross-session memory for Claude Code).",
+  "owner": {
+    "name": "Batuhan Tunç"
+  },
+  "plugins": [
+    {
+      "name": "context-kit",
+      "source": "./",
+      "description": "Cross-session memory for Claude Code projects: handoff note injected at session start, staleness warning, handoff / resume skills."
+    }
+  ]
+}

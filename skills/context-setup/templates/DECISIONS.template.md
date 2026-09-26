@@ -1,7 +1,8 @@
-# Kararlar
-<!-- KATMAN 1. Format: tarih | karar | neden | kapsam. Karar değişirse eski satır silinmez:
-     sonuna "→ YERİNE: <yeni tarih>" eklenir, yeni satır açılır. Böylece "neden değişti" izlenebilir. -->
+# Decisions
+<!-- context-kit · Layer 1: read before changing established behavior. One row per decision.
+     A decision changes only with the user's agreement: never delete the old row; append
+     "→ superseded YYYY-MM-DD" to it and add a new row, so the reason for the change stays traceable. -->
 
-| Tarih | Karar | Neden | Kapsam |
+| Date | Decision | Why | Scope |
 |---|---|---|---|
-| YYYY-MM-DD | <karar> | <neden> | <modül / iş / tüm proje> |
+| YYYY-MM-DD | <decision> | <reason; when it could be revisited> | <module / work / whole project> |
