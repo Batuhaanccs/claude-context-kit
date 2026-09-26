@@ -69,7 +69,13 @@ claude --plugin-dir /path/to/claude-context-kit
 claude plugin marketplace add /path/to/claude-context-kit      # or: <github-user>/claude-context-kit
 claude plugin install context-kit@context-kit --scope user
 ```
-Local-directory installs load files in place: edits take effect in the next session or after `/reload-plugins`.
+The install is a **copy** (`~/.claude/plugins/cache/context-kit/context-kit/<version>/`). After editing this repo,
+bump `version` in `.claude-plugin/plugin.json`, commit, then:
+```bash
+claude plugin marketplace update context-kit
+claude plugin update context-kit@context-kit      # new sessions use the new version
+```
+To try edits before releasing them, use `claude --plugin-dir .` in a test project.
 
 Disable / remove: `claude plugin disable context-kit@context-kit`, `claude plugin uninstall context-kit@context-kit`.
 Per-project removal: delete the `context-kit:start … end` block from CLAUDE.md and the `docs/` files you no longer want.
