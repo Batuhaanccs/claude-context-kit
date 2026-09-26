@@ -1,6 +1,6 @@
 {
   "name": "context-kit",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Cross-session memory for Claude Code projects: a small handoff note (docs/STATE.md) injected at session start with a git-based staleness warning, plus handoff / resume / setup / hygiene skills. Inactive in projects without docs/STATE.md.",
   "author": {
     "name": "Batuhan Tunç"

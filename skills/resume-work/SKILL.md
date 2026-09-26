@@ -14,9 +14,9 @@ Paths like `docs/...` are relative to the **project root**: the directory Claude
 2. Pick the work item: the one the user named; if several are active and it is ambiguous, ask which one.
 3. Read **only the status box** at the top of that item's plan file. Not the whole plan, not the logs.
 4. Cheap reality check:
-   - If the session-start note reported commits or changes after STATE's last update, look at them
-     (`git log --oneline` for that range, `git status --short`) and reconcile with STATE.
-   - Do files and branches named in STATE exist? Does "Next" still make sense given the latest commits?
+   - Do the files named in STATE exist, and do they look like STATE describes? (e.g. STATE says "step 3 not started"
+     but the code for step 3 is already there → STATE is outdated; say so.)
+   - Does "Next" still make sense?
 5. Reply in the user's language, in at most 4 lines:
    - Understood: <work item, where it stands>
    - Next: <step>
@@ -27,4 +27,4 @@ Paths like `docs/...` are relative to the **project root**: the directory Claude
 
 ## Later in the session
 - Before using a tool/API/library, grep `docs/LESSONS.md` for it. Do not read the whole file.
-- Need detail? Grep `docs/logs/` or `git log`. Never read a log end to end.
+- Need detail? Grep `docs/logs/`. Never read a log end to end.

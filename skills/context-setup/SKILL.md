@@ -12,7 +12,7 @@ Doc content is written in the user's language; template headings may be translat
 
 ## 1. Inspect (read-only)
 - Look for: CLAUDE.md (root and `.claude/`), AGENTS.md, `docs/`, README, ROADMAP/TODO, plan files,
-  other memory systems (`memory-bank/`, `.cursorrules`, `.clinerules`), git status.
+  other memory systems (`memory-bank/`, `.cursorrules`, `.clinerules`).
 - Measure sizes (`wc -l`). Note what is missing, oversized, duplicated or stale
   (e.g. a "next step" that is already done).
 - If `docs/STATE.md` or a `context-kit:start` block already exists, this is a re-run: only report gaps.
@@ -21,21 +21,19 @@ Doc content is written in the user's language; template headings may be translat
   Then warn: internal notes could be published. Suggest excluding them in the site config; let the user decide.
 
 ## 2. Propose, then wait for approval
-Show a short table: what exists, what you will create, what you suggest moving. Ask two questions:
-- Should the context docs be committed to git? (Default: yes. The staleness warning relies on git history.)
-  If no, add `docs/STATE.md docs/logs/` (or what the user chooses) to `.gitignore`.
-- Anything that must not be touched?
+Show a short table: what exists, what you will create, what you suggest moving. Ask: anything that must not be touched?
 
 ## 3. Create (only what is missing; start small)
 - `docs/STATE.md` from the template (keep its `context-kit` marker comment: the hook injects only files that
-  have it), filled with the **real current state** (from this conversation, git log,
-  plan files). If there is no active work, say so in one line. Use `date "+%Y-%m-%d %H:%M"` for the time.
+  have it), filled with the **real current state** (from this conversation and the project's
+  files). If there is no active work, say so in one line. Use `date "+%Y-%m-%d %H:%M"` for the time.
 - CLAUDE.md: append the CLAUDE-block template (between its `context-kit:start/end` markers). Do not delete or
   rewrite existing rules. Add map rows for the project's own important docs; remove rows for files that do not exist.
   If CLAUDE.md does not exist, create it with a one-line project description plus the block.
 - Do **not** create LESSONS, DECISIONS, plans or logs yet unless there is real content for them now.
   They are created from the templates the first time something needs to go there (handoff does this).
-- If the project is not a git repo, back up any file you change first (`<file>.bak-YYYYMMDD`).
+- Before changing an existing file (e.g. CLAUDE.md), back it up (`<file>.bak-YYYYMMDD`) unless the project uses
+  version control.
 
 ## 4. Migrate existing material (only with approval)
 - Scattered decisions (in roadmap, plans, README) → rows in `docs/DECISIONS.md`; leave a link in the old place.

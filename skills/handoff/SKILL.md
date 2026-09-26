@@ -16,7 +16,7 @@ If `docs/STATE.md` does not exist, offer the `context-setup` skill instead and s
 ## Steps
 1. **Collect from this conversation** (not from files): which work items this session touched, the last finished
    step, anything half-done, decisions made (with reasons), pending questions for the user, approaches tried and
-   dropped, beliefs not yet verified, recurring pitfalls discovered. Run `git status --short` if it is a git repo.
+   dropped, beliefs not yet verified, recurring pitfalls discovered, files changed but not finished.
    Get the real time with `date "+%Y-%m-%d %H:%M"`; never guess it.
 2. **Re-read `docs/STATE.md` from disk now** (another session may have changed it since it was injected).
    Edit it in place:
@@ -45,7 +45,7 @@ If `docs/STATE.md` does not exist, offer the `context-setup` skill instead and s
    `docs/logs/` (suggest `doc-hygiene` if it is large). Re-read STATE once: does every line describe the present?
    Does anything contradict a plan box?
 9. **Report in at most 5 lines**: which files changed, and what to type in the next session (usually just
-   "devam" / "continue"). If the repo is git, offer to commit the docs; do not commit unasked.
+   "devam" / "continue").
 
 Templates: `${CLAUDE_SKILL_DIR}/../context-setup/templates/`.
 
