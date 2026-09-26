@@ -1,0 +1,9 @@
+{
+  "name": "context-kit",
+  "version": "0.1.0",
+  "description": "Oturumlar arası bağlam sistemi: katmanlı docs (STATE, LESSONS, DECISIONS, plan durum kutusu), devret/devam/temizlik skill'leri ve STATE.md'yi oturum başında otomatik ekleyen hook.",
+  "author": {
+    "name": "Batuhan Tunç"
+  },
+  "keywords": ["context", "memory", "handoff", "session", "docs"]
+}
