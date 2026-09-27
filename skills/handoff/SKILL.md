@@ -26,8 +26,11 @@ If `docs/STATE.md` does not exist, offer the `context-setup` skill instead and s
      append it as a dated line to `docs/logs/<work>.md`.
    - Keep the `context-kit` marker comment at the top; the session-start hook injects only files that have it.
    - "Next" is one concrete action someone could start immediately ("run the X tests after fixing Y", not "continue").
-   - Refresh "Waiting on the user", "Watch out", "Unverified assumptions", "Tried and dropped" for your items;
-     delete lines that are no longer true. Anything recorded in LESSONS or DECISIONS (steps 5-6) is not repeated
+   - Shared sections ("Waiting on the user", "Watch out", "Unverified assumptions", "Tried and dropped"): every
+     line starts with a tag, `[<work name>]` or `[all]`. Add new lines with your item's tag. Refresh only lines
+     tagged with your items, or `[all]` lines that this session actually resolved; delete those that are no longer true.
+     Never remove a line tagged with another item. An untagged line (older format): tag it if its owner is obvious;
+     otherwise leave it as is and mention it in your report. Anything recorded in LESSONS or DECISIONS (steps 5-6) is not repeated
      in STATE; a fixed pitfall is a lesson, not a "watch out".
    - Update the `Updated:` line.
 3. **Plan status box** (`docs/plans/<work>.md`, if the work has one): tick finished steps, update Status/Next/Blocked.

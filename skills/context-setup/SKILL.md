@@ -26,7 +26,8 @@ Show a short table: what exists, what you will create, what you suggest moving. 
 ## 3. Create (only what is missing; start small)
 - `docs/STATE.md` from the template (keep its `context-kit` marker comment: the hook injects only files that
   have it), filled with the **real current state** (from this conversation and the project's
-  files). If there is no active work, say so in one line. Use `date "+%Y-%m-%d %H:%M"` for the time.
+  files). Tag every line in the shared sections with its work item (`[<work name>]`) or `[all]`.
+  If there is no active work, say so in one line. Use `date "+%Y-%m-%d %H:%M"` for the time.
 - CLAUDE.md: append the CLAUDE-block template (between its `context-kit:start/end` markers). Do not delete or
   rewrite existing rules. Add map rows for the project's own important docs; remove rows for files that do not exist.
   If CLAUDE.md does not exist, create it with a one-line project description plus the block.

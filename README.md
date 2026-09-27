@@ -50,8 +50,9 @@ Principles:
 | `resume-work` | "continue" / "devam" | Reads STATE and the plan's status box, checks the files it names, confirms in <= 4 lines before working |
 | `doc-hygiene` | "doc hygiene" / "dokümanları temizle" | Budgets, outdated-line sweep, contradictions, map check. Moves content, never loses it |
 
-STATE.md is an **index of active work items**, one bullet each. Parallel work streams do not overwrite each other,
-and handoff re-reads the file from disk before editing, in case another session changed it.
+STATE.md is an **index of active work items**, one bullet each. Lines in its shared sections (questions, cautions,
+assumptions, dropped attempts) are tagged `[<work name>]` or `[all]`. Parallel sessions working on different items
+touch only their own lines, and handoff re-reads the file from disk before editing, in case another session changed it.
 
 ## Install
 

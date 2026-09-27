@@ -23,8 +23,10 @@ Paths like `docs/...` are relative to the **project root**: the directory Claude
    Anything already done, abandoned or wrong is updated or moved to the log.
 3. **Contradictions:** the same fact stated differently in two places (e.g. plan says "Step 5 next", STATE says
    "Step 9"). Reduce to one source; the other place links to it.
-4. **Map check:** every path in the CLAUDE.md map exists; every important doc is on the map.
-5. **Move, don't delete.** Leave a one-line link where content was moved. Delete only with the user's approval.
-6. Show the user before/after line counts and the list of moves. Ask before any large move or split.
+4. **Tags:** every line in STATE's shared sections starts with `[<work name>]` or `[all]`, and each tag matches an
+   active item. Propose tags for untagged lines; lines of finished items move to that item's log.
+5. **Map check:** every path in the CLAUDE.md map exists; every important doc is on the map.
+6. **Move, don't delete.** Leave a one-line link where content was moved. Delete only with the user's approval.
+7. Show the user before/after line counts and the list of moves. Ask before any large move or split.
 
 Write in the language the docs already use.

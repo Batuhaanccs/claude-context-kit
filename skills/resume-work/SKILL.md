@@ -12,6 +12,7 @@ Paths like `docs/...` are relative to the **project root**: the directory Claude
 1. Use `docs/STATE.md` as injected at session start (read it only if it is not already in context).
    Treat it as a hypothesis written by an earlier session, not as ground truth.
 2. Pick the work item: the one the user named; if several are active and it is ambiguous, ask which one.
+   From the shared sections, the lines that matter are those tagged with that item or `[all]`.
 3. Read **only the status box** at the top of that item's plan file. Not the whole plan, not the logs.
 4. Cheap reality check:
    - Do the files named in STATE exist, and do they look like STATE describes? (e.g. STATE says "step 3 not started"
