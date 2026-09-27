@@ -61,21 +61,19 @@ Requires Claude Code and `bash` (on Windows: Git Bash, which Claude Code's norma
 > **Status: early (0.x).** Tested on Windows 11 with Claude Code 2.1. macOS and Linux are not tested yet; the hook
 > avoids GNU-only tools where possible, but please report problems.
 
+From GitHub (this repo is its own marketplace), in a terminal:
 ```bash
-# Try without installing (this session only)
-claude --plugin-dir /path/to/claude-context-kit
-
-# Permanent install (this repo is its own marketplace)
-claude plugin marketplace add /path/to/claude-context-kit      # or: <github-user>/claude-context-kit
+claude plugin marketplace add Batuhaanccs/claude-context-kit
 claude plugin install context-kit@context-kit --scope user
 ```
-The install is a **copy** (`~/.claude/plugins/cache/context-kit/context-kit/<version>/`). After editing this repo,
-bump `version` in `.claude-plugin/plugin.json`, commit, then:
-```bash
-claude plugin marketplace update context-kit
-claude plugin update context-kit@context-kit      # new sessions use the new version
-```
-To try edits before releasing them, use `claude --plugin-dir .` in a test project.
+or inside a Claude Code session: `/plugin marketplace add Batuhaanccs/claude-context-kit`, then
+`/plugin install context-kit@context-kit`. Start a new session afterwards.
+
+Get updates: `claude plugin marketplace update context-kit` then `claude plugin update context-kit@context-kit`.
+
+From a local clone (for development): `claude plugin marketplace add /path/to/claude-context-kit`, same install
+command. The install is a **copy** (`~/.claude/plugins/cache/context-kit/`), so local edits need a version bump and the
+two update commands above. To try edits without installing: `claude --plugin-dir /path/to/claude-context-kit`.
 
 Disable / remove: `claude plugin disable context-kit@context-kit`, `claude plugin uninstall context-kit@context-kit`.
 Per-project removal: delete the `context-kit:start … end` block from CLAUDE.md and the `docs/` files you no longer want.
