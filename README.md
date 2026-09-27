@@ -56,7 +56,10 @@ touch only their own lines, and handoff re-reads the file from disk before editi
 
 ## Install
 
-Requires Claude Code with Git Bash on Windows (Claude Code's normal Windows setup) or any `bash` on macOS/Linux.
+Requires Claude Code and `bash` (on Windows: Git Bash, which Claude Code's normal Windows setup already uses).
+
+> **Status: early (0.x).** Tested on Windows 11 with Claude Code 2.1. macOS and Linux are not tested yet; the hook
+> avoids GNU-only tools where possible, but please report problems.
 
 ```bash
 # Try without installing (this session only)
