@@ -83,7 +83,7 @@ emit() {
   if [ "$FORMAT" = "json" ]; then
     local esc
     esc=$(printf '%s' "$OUT" | awk 'BEGIN { ORS = "" } { gsub(/\\/, "\\\\"); gsub(/"/, "\\\""); gsub(/\t/, "\\t"); gsub(/\r/, ""); if (NR > 1) print "\\n"; print }')
-    printf '{"injectSteps":[{"systemMessage":{"systemMessage":"%s","metadata":{"source":"context-kit"}}}]}\n' "$esc"
+    printf '{"injectSteps":[{"systemMessage":{"systemMessage":"%s"}}]}\n' "$esc"
   else
     printf '%s' "$OUT"
   fi
