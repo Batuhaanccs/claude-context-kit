@@ -1,10 +1,14 @@
 # context-kit
 
-Cross-session memory for Claude Code projects. When the context fills up, the session ends, or you open a new
+Cross-session and cross-agent memory for Claude Code projects, with Google Antigravity (and other agents) sharing the
+same ledger. When the context fills up, the session ends, or you open a new
 session for a different purpose, Claude should not **forget** what was done, **misread** it, or **act on stale
 information**, and it should do this without bloating the context or turning docs into rigid recipes.
 
-It is inactive in any project without a context-kit `docs/STATE.md` (the file must carry the `context-kit` marker
+Since 0.3 several agents can work on one project, one after another or in parallel, without overwriting each other:
+see [Multi-agent](#multi-agent-claude-code--antigravity).
+
+It is inactive in any project without a context-kit ledger (`<private>/ctx/STATE.md` or `docs/STATE.md`) (the file must carry the `context-kit` marker
 comment that setup writes, so an unrelated `docs/STATE.md` in some repo is never injected). Installing it changes
 nothing until you run setup in a project.
 
@@ -54,6 +58,44 @@ STATE.md is an **index of active work items**, one bullet each. Lines in its sha
 assumptions, dropped attempts) are tagged `[<work name>]` or `[all]`. Parallel sessions working on different items
 touch only their own lines, and handoff re-reads the file from disk before editing, in case another session changed it.
 
+## Multi-agent (Claude Code + Antigravity)
+
+```
+<project>/_you/ctx/          private ledger: in your global git exclude, never committed, invisible to teammates
+  STATE.md                   active work index + Claims (who works on what right now) + Git-base
+  agents/claude.md           each agent's handoff file: done / half-done / next / Touched files, per work item
+  agents/antigravity.md
+  journal.md                 append-only: time | agent#session | commit | what
+  DECISIONS.md LESSONS.md plans/ logs/   (created when needed)
+```
+- **One hook, every agent.** `scripts/session-start.sh` is Claude Code's plugin hook and, with `--agent antigravity`,
+  Antigravity's global `SessionStart` hook (`~/.gemini/config/hooks.json`, JSON `injectSteps` output). Both get the
+  same protocol, STATE, their own handoff file, stale claims and, in git repos, the commits and uncommitted changes since
+  the last handoff, with the agent that made each commit when the journal knows it.
+- **Claims** are advisory locks on paths and shared resources (`unity-editor`, `scene:X.unity`, `playmode`, ...). An agent
+  that finds an overlap, or is not sure, asks the user instead of guessing. Claims older than `STALE_HOURS` are flagged;
+  only the user decides to remove them.
+- **Commits stay yours.** Agents stage only their own Touched files by path, add no agent names or trailers, and record
+  "which agent made which commit" in the journal instead.
+- **Git is optional.** Without git the ledger works the same; only the "what changed" section is missing.
+- **Worktrees:** a linked git worktree reads the main worktree's ledger (the private folder is not copied by git).
+- **New projects:** in a folder that looks like a project, the agent offers setup once; "no" is remembered
+  (`ctx.sh decline`). `ASK_NEW_PROJECTS=0` in the config turns this off.
+- Older projects with `docs/STATE.md` keep working unchanged.
+
+### Machine setup (once)
+Say "bağlam sistemini kur" / "set up context-kit" in Claude Code (the setup skill asks for your folder name), or run:
+```bash
+bash ~/.claude/plugins/cache/context-kit/context-kit/<version>/scripts/ctx.sh install --name _you
+```
+It writes `~/.config/context-kit/config` (`CTX_DIR=_you/ctx`, `STALE_HOURS=4`, `ASK_NEW_PROJECTS=1`), adds `_you/` and
+`CLAUDE.local.md` to your global git exclude (`core.excludesFile`, default `~/.config/git/ignore`), copies the
+agent-independent parts to `~/.config/context-kit/` (kept in sync automatically when the plugin updates), and for
+Antigravity installs the hook, the four skills (`~/.gemini/config/skills/`) and a short fallback rule in
+`~/.gemini/GEMINI.md`. `--no-antigravity` skips the last part. Re-running is safe.
+
+Per project: `ctx.sh init` (private) or `ctx.sh init --docs`; `ctx.sh status` shows what is configured.
+
 ## Install
 
 Requires Claude Code and `bash` (on Windows: Git Bash, which Claude Code's normal Windows setup already uses).
@@ -86,14 +128,17 @@ Per-project removal: delete the `context-kit:start … end` block from CLAUDE.md
 4. When docs feel messy or the hook warns: "doc hygiene".
 
 ## Development
-- `bash tests/test-session-start.sh`: hook tests (activation, marker, every source, budgets, age,
-  Windows paths, UTF-8, garbage stdin).
+- `bash tests/test-session-start.sh`: hook and `ctx.sh` tests (activation, marker, every source, budgets, age,
+  Windows paths, UTF-8, garbage stdin, install/init/decline, private ledger, claims, journal, Antigravity JSON,
+  worktrees). They use temp homes and never touch your real config.
 - `claude plugin validate .`
 - Manual check after hook changes (cannot be automated in `-p` mode): in a test project, run `/compact` in an
   interactive session, then ask Claude to quote the context-kit guidance it received. It must be the "summary is
   NEWER" line.
 
 ## Limits (honest notes)
+- Claims are a convention, not an OS lock: they work as long as agents follow the protocol. Claude gets it from the
+  hook every session; in Antigravity the hook does the same, and the GEMINI.md rule is a fallback.
 - No plugin guarantees memory. The handoff habit is still yours. If a handoff is missed, STATE is outdated: the note
   shows how many days ago STATE was modified, and Claude checks it against the actual files before relying on it.
 - Handoff quality depends on what is still in context; after heavy compaction, details may already be lost.
