@@ -12,6 +12,7 @@
 - One fact lives in one place; elsewhere, link to it. Write decisions as decision + reason, not recipes.
   Changing a past decision: ask the user, add a new row, mark the old one superseded.
 - While working: when a plan step finishes, tick it and update the plan's status box.
+- Other agents may work here too: follow the multi-agent protocol in the session-start message (claims, Touched, journal).
 - Before ending a session or when the context gets long: run the handoff skill ("handoff" / "devret").
 - When summarizing or compacting, preserve: active work item, next step, pending user decisions,
   unverified assumptions, files changed.
