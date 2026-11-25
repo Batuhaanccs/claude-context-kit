@@ -106,6 +106,9 @@ OUT=$(run "$P" startup)
 check "private ledger injected" "$OUT" "_tester/ctx/STATE.md"
 check "protocol injected" "$OUT" "Multi-agent protocol"
 check "agent id" "$OUT" "You are claude#t"
+check "private ledger note" "$OUT" "private, git-ignored"
+check "no placeholder left" "$OUT" "\{\{" absent
+check "docs ledger note" "$(run "$(mkproj docsnote)" startup)" "project docs folder"
 
 # Claims, agent files, journal-annotated commits, uncommitted changes
 L="$P/_tester/ctx"
