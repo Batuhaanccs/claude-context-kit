@@ -105,6 +105,7 @@ grep -q '<work name>' "$P/_tester/ctx/STATE.md" && grep -q '^- \*\*<work name>\*
 OUT=$(run "$P" startup)
 check "private ledger injected" "$OUT" "_tester/ctx/STATE.md"
 check "protocol injected" "$OUT" "Multi-agent protocol"
+check "no unrequested git actions" "$OUT" "never push"
 check "agent id" "$OUT" "You are claude#t"
 check "private ledger note" "$OUT" "private, git-ignored"
 check "no placeholder left" "$OUT" "\{\{" absent
