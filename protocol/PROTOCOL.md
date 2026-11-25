@@ -22,6 +22,11 @@ branches or open PRs unless the user asks in the current request. Claiming, hand
 **Committing:** stage only files on your Touched list, by explicit path (never `git add -A` / `git add .`).
 Changed files that are not yours: leave them out and tell the user. Commits carry no agent name or AI trailer.
 After a commit, append a journal line with the short hash.
-**Finishing / handing off** (handoff skill, "devret"): update your agent file and your STATE lines, set `Git-base:` to the
-current `git rev-parse --short HEAD` (if git), append a journal line, then delete your claim.
+**Task done (automatic, no need to be asked):** whenever a task the user gave you is finished, or the user moves you to a
+different task, even with nothing committed and the session going on: in your agent file update that item's Done / Next
+and keep its **Touched** list (uncommitted files stay yours for a later commit), update its STATE line, append a journal
+line (`<commit or -> | <what was done>`), and delete or narrow your claim to what the next task needs. Small edits only;
+mention it in one line at the end of your reply. Not after every message: only when a task is done or switched.
+**Ending a session** (handoff skill, "devret"): the full version: also decisions, lessons, plans, logs and `Git-base:`
+(current `git rev-parse --short HEAD`, if git); then delete all your claims.
 **Changes you did not expect** (git commits or files not explained by the ledger): ask the user what happened before relying on them.
