@@ -7,7 +7,11 @@ Source of the `context-kit` plugin; the repo is also its own marketplace. What i
   change carefully, test before every release.
 - Git workflow (branches, Conventional Commits, PRs, releases): `CONTRIBUTING.md`. Push after every update.
 - Plugin internals (skills, hook, templates, README) are in English; talk to the user in Turkish.
-- The plugin must not depend on git or any other tool in user projects; it must work in any folder.
+- The plugin must not depend on git or any other tool in user projects; it must work in any folder. Git is used only
+  as an optional extra (what changed since the last handoff).
+- `scripts/session-start.sh` and `scripts/ctx.sh` also run outside Claude Code (Antigravity hook, from the shared copy in
+  `~/.config/context-kit/`): no Claude-only variables in them except the guarded `CLAUDE_PROJECT_DIR`; skills must read
+  the same in every agent.
 - Installed copy lives in `~/.claude/plugins/cache/context-kit/`; edits here reach it only after a release.
 - `/compact` cannot be tested in `claude -p`; test it in an interactive session.
 
