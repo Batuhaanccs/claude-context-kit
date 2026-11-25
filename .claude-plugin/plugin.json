@@ -1,10 +1,10 @@
 {
   "name": "context-kit",
-  "version": "0.2.2",
-  "description": "Cross-session memory for Claude Code projects: a small handoff note (docs/STATE.md) injected at session start with a git-based staleness warning, plus handoff / resume / setup / hygiene skills. Inactive in projects without docs/STATE.md.",
+  "version": "0.3.0",
+  "description": "Cross-session and cross-agent memory: a private shared ledger (handoff note, claims, per-agent handoff files, journal) injected at session start in Claude Code and Google Antigravity, plus handoff / resume / setup / hygiene skills. Inactive in projects without a ledger.",
   "author": {
     "name": "Batuhan Tunç"
   },
   "license": "MIT",
-  "keywords": ["context", "memory", "handoff", "session", "compaction", "docs"]
+  "keywords": ["context", "memory", "handoff", "session", "compaction", "multi-agent", "antigravity"]
 }
