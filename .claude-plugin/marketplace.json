@@ -1,6 +1,6 @@
 {
   "name": "context-kit",
-  "description": "Marketplace for the context-kit plugin (cross-session memory for Claude Code).",
+  "description": "Marketplace for the context-kit plugin (cross-session, cross-agent memory for Claude Code and Antigravity).",
   "owner": {
     "name": "Batuhan Tunç"
   },
