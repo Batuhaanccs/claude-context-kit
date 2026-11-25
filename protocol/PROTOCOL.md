@@ -17,6 +17,8 @@ You are `{{AGENT}}`. The shared ledger is `{{LEDGER}}/` ({{LEDGER_NOTE}}).
 Read-only work (answering questions, reading code) needs no claim.
 
 **While working:** list every file you change under your work item in your agent file ("Touched").
+**Git actions need the user's request:** commit only when the user asks for it; never push, pull, merge, rebase, switch
+branches or open PRs unless the user asks in the current request. Claiming, handoff and the journal never imply a commit.
 **Committing:** stage only files on your Touched list, by explicit path (never `git add -A` / `git add .`).
 Changed files that are not yours: leave them out and tell the user. Commits carry no agent name or AI trailer.
 After a commit, append a journal line with the short hash.
