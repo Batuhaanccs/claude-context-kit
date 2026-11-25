@@ -1,58 +1,52 @@
 ---
 name: handoff
-description: Save the session's working state to the project's docs so a fresh session can continue without loss. Use when the user says "handoff", "devret", "save state", "wrap up", "oturumu kapat", "kaydet ve bitir", "context is filling up", or before ending a long session in a project that has docs/STATE.md. Updates only docs, never code.
+description: Save this session's working state to the shared context-kit ledger so a fresh session, or another agent, can continue without loss. Use when the user says "handoff", "devret", "save state", "wrap up", "oturumu kapat", "kaydet ve bitir", "context is filling up", or before ending a long session in a project with a context-kit ledger. Updates only the ledger (and docs it maps), never code.
 ---
 
 # Handoff
 
-Goal: nothing learned in this session is lost when the context is compacted or closed. A new session that reads
-only CLAUDE.md + `docs/STATE.md` must be able to continue from the right place, without being misled by stale lines.
+Goal: nothing learned in this session is lost, and the next session of **any** agent knows exactly where things stand,
+who changed what, and that your claim is released.
 
-Paths like `docs/...` are relative to the **project root**: the directory Claude Code was started in. Not this skill's directory, and not the shell's current directory after a `cd`.
+The **ledger** is the folder named in the context-kit session-start message: `<private name>/ctx/` (e.g. `_batuhan/ctx/`)
+or `docs/` (older layout), relative to the project root (the workspace folder; not this skill's folder, not the shell's cwd).
+In a linked git worktree the message gives the main worktree's ledger path: use that.
+**You** are the agent id from that message (e.g. `claude#a1f3`, `antigravity#ec33`); your agent file is `agents/<agent name>.md`.
+No ledger → offer the context-setup skill and stop.
 
-Write in the language the existing docs use (for new files: the language the user speaks).
-If `docs/STATE.md` does not exist, offer the `context-setup` skill instead and stop.
+Write in the language the existing files use. Templates: the context-setup skill's `templates/` folder (sibling of this skill's
+folder; shared copy in `~/.config/context-kit/skills/context-setup/templates/`).
 
 ## Steps
-1. **Collect from this conversation** (not from files): which work items this session touched, the last finished
-   step, anything half-done, decisions made (with reasons), pending questions for the user, approaches tried and
-   dropped, beliefs not yet verified, recurring pitfalls discovered, files changed but not finished.
-   Get the real time with `date "+%Y-%m-%d %H:%M"`; never guess it.
-2. **Re-read `docs/STATE.md` from disk now** (another session may have changed it since it was injected).
-   Edit it in place:
-   - Update or add only the bullets of the work this session touched. Keep other work items untouched.
-     Remove an item only when it is finished (and its plan box says so) or the user dropped it.
-   - Nothing is lost: before removing any line (a finished item, an obsolete note, a "tried and dropped" entry),
-     append it as a dated line to `docs/logs/<work>.md`.
-   - Keep the `context-kit` marker comment at the top; the session-start hook injects only files that have it.
-   - "Next" is one concrete action someone could start immediately ("run the X tests after fixing Y", not "continue").
-   - Shared sections ("Waiting on the user", "Watch out", "Unverified assumptions", "Tried and dropped"): every
-     line starts with a tag, `[<work name>]` or `[all]`. Add new lines with your item's tag. Refresh only lines
-     tagged with your items, or `[all]` lines that this session actually resolved; delete those that are no longer true.
-     Never remove a line tagged with another item. An untagged line (older format): tag it if its owner is obvious;
-     otherwise leave it as is and mention it in your report. Anything recorded in LESSONS or DECISIONS (steps 5-6) is not repeated
-     in STATE; a fixed pitfall is a lesson, not a "watch out".
-   - Update the `Updated:` line.
-3. **Plan status box** (`docs/plans/<work>.md`, if the work has one): tick finished steps, update Status/Next/Blocked.
-   Mark instructions that are no longer valid as `(obsolete)` or remove them. Never leave an old "next step" standing.
-4. **Details** (numbers, file paths, commands, what was tried) go to `docs/logs/<work>.md` as dated lines. Not into
-   the plan, not into STATE.
-5. **Decisions** the user made or agreed to in this session: add rows to `docs/DECISIONS.md` (create it from the
-   template if missing). A changed decision gets a new row and the old row is marked `→ superseded YYYY-MM-DD`,
-   but only if the user agreed to the change; otherwise list it under "Waiting on the user".
-6. **Lessons**: new recurring pitfalls → one line each in `docs/LESSONS.md` (create from template if missing).
-   Grep first; do not duplicate.
-7. **Other tracking docs** listed in the CLAUDE.md map (roadmap, TODO): if one contradicts STATE, propose the fix
-   in your report; do not edit them without the user's approval.
-8. **Check**: STATE <= 40 lines, plan box <= 12 lines, LESSONS <= 60 lines. Over budget → move the excess to
-   `docs/logs/` (suggest `doc-hygiene` if it is large). Re-read STATE once: does every line describe the present?
-   Does anything contradict a plan box?
-9. **Report in at most 5 lines**: which files changed, and what to type in the next session (usually just
-   "devam" / "continue").
-
-Templates: `${CLAUDE_SKILL_DIR}/../context-setup/templates/`.
+1. **Collect from this conversation** (not from files): work items touched, last finished step, anything half-done,
+   decisions (with reasons), questions for the user, approaches dropped, unverified beliefs, pitfalls, files changed.
+   Real time: `date "+%Y-%m-%d %H:%M"`. Git: `git rev-parse --short HEAD` and `git status --porcelain` (if a repo).
+2. **Your agent file** `agents/<agent name>.md` (create from AGENT.template.md if missing). Edit only the sections of the
+   items this session worked on; other sessions of the same agent may own other sections. Per item: Updated (with your
+   agent id), Done, Half-done, Next (one concrete action), **Touched (not yet committed)**: every file you changed that is
+   still uncommitted. Remove a section when its item is finished (copy its notes to `logs/<work>.md` first).
+3. **STATE.md: re-read it from disk now** (other agents may have changed it). Edit in place:
+   - Your items' lines in Active work, with the owner: `- **<work>** (<agent name>): ... Next: ...`. Never touch another item.
+   - Shared sections: every line starts with `[<work name>]` or `[all]`. Refresh only your items' lines (or `[all]` lines this
+     session resolved). Never remove another item's line. Pitfalls go to LESSONS, decisions to DECISIONS, not here.
+   - Nothing is lost: before removing a line, append it as a dated line to `logs/<work>.md`.
+   - Keep the `context-kit` marker comment at the top. Update `Updated:`.
+   - `Git-base:` = the current short HEAD (git repos only), so the next session sees what changed after this point.
+   - **Claims: delete your own claim lines** (your agent id). If work continues later, the next session claims again.
+     Never edit another agent's claim.
+4. **Journal** `journal.md`: append one line: `YYYY-MM-DD HH:MM | <agent id> | <short HEAD or -> | handoff: <one-line summary>`.
+   Commits made in this session should already have their own lines; add any that are missing.
+5. **Plan status box** (`plans/<work>.md`, if any): tick finished steps, update Status/Next/Blocked; mark obsolete lines.
+6. **Details** (numbers, paths, commands, what was tried) → `logs/<work>.md` as dated lines.
+7. **Decisions** the user made or agreed to → `DECISIONS.md` (from template if missing). A changed decision: new row, old row
+   `→ superseded YYYY-MM-DD`, only with the user's agreement; otherwise list it under "Waiting on the user".
+8. **Lessons**: new recurring pitfalls → one line each in `LESSONS.md` (grep first; no duplicates).
+9. **Team / project docs** (outside the ledger): if one contradicts the ledger, propose the fix in your report; never edit
+   them without approval.
+10. **Check**: STATE <= 40 lines, agent file <= 60 lines, plan box <= 12, LESSONS <= 60. Over budget → move to `logs/`.
+11. **Report in at most 5 lines**: files changed, claim released, uncommitted files left (yours / not yours), and what to type
+    next time (usually "devam" / "continue", in any agent).
 
 ## Do not
-- Change code, assets or configs. This skill only edits docs.
-- Paste conversation transcript. Write state and decisions, not dialogue.
-- Rewrite STATE.md from scratch; other work items may live there.
+- Change code, assets or configs. Commit anything (unless the user asked for a commit in this same request).
+- Paste conversation transcript. Rewrite STATE.md or another agent's file from scratch.
