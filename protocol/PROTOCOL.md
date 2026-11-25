@@ -1,6 +1,6 @@
 ## Multi-agent protocol (context-kit)
 Several agents (Claude Code, Antigravity, others) and parallel sessions of each may work on this project.
-You are `{{AGENT}}`. The shared ledger is `{{LEDGER}}/` (private notes; never commit it, never copy its content into tracked files).
+You are `{{AGENT}}`. The shared ledger is `{{LEDGER}}/` ({{LEDGER_NOTE}}).
 - `STATE.md`: active work index + **Claims** (who is working on what right now). Re-read it from disk before editing; edit only your own lines.
 - `agents/<agent>.md`: each agent's handoff file (one section per work item). Yours: `agents/{{AGENT_NAME}}.md`.
 - `journal.md`: append-only, one line per commit or handoff: `YYYY-MM-DD HH:MM | <agent#tag> | <commit or -> | <what>`.

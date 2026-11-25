@@ -159,7 +159,9 @@ say "$HOW"
 [ -n "$PRIV" ] && [ -n "$LEG" ] && say "WARNING: two context-kit ledgers exist ($CTX_DIR/ and docs/). Using $CTX_DIR/. Tell the user and ask which one is current; do not merge them on your own."
 if [ -f "$KIT_DIR/protocol/PROTOCOL.md" ]; then
   say ""
-  say "$(sed -e "s|{{AGENT}}|$AGENT|g" -e "s|{{AGENT_NAME}}|$AGENT_NAME|g" -e "s|{{LEDGER}}|$REL|g" -e "s|{{STALE_HOURS}}|$STALE_HOURS|g" "$KIT_DIR/protocol/PROTOCOL.md")"
+  if [ -n "$PRIV" ]; then NOTE="private, git-ignored: never commit it, never copy its content into tracked files"
+  else NOTE="project docs folder: commit ledger files only if the project already versions them"; fi
+  say "$(sed -e "s|{{LEDGER_NOTE}}|$NOTE|g" -e "s|{{AGENT}}|$AGENT|g" -e "s|{{AGENT_NAME}}|$AGENT_NAME|g" -e "s|{{LEDGER}}|$REL|g" -e "s|{{STALE_HOURS}}|$STALE_HOURS|g" "$KIT_DIR/protocol/PROTOCOL.md")"
 fi
 say "---"
 say "$(head -n "$STATE_MAX_LINES" "$STATE")"
